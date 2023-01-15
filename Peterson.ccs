@@ -1,0 +1,47 @@
+* MUTUAL EXCLUSION PROTOCOLS ANALYSIS
+* Peterson's algorithm for mutual exclusion. (1981)
+
+* See Chapter 7 of "Reactive Systems" for a full description or just the following.
+
+* 2 processes: P1, P2
+* 2 boolean variables: b1, b2 (both initially false)
+* when Pi wants to enter the critical section, then it sets bi to true
+* an integer variable k, taking value in {1, 2}
+* (initial value is arbitrary)
+* the process Pk has priority over the other process
+* 
+* process P1 in pseudocde
+* while(true){
+* ...                       non critical section
+* b1 = true;                P1 wants to enter the critical section
+* k = 2;                    P1 gives priority to the other process
+* while(b2 && k==2) skip;   P1 waits its turn
+* ...                       P1 enters the critical section
+* b1 = false;               P1 leaves the critical section
+* }
+* 
+* process P2 is analogous to P1 (but with k and b1 switched)
+
+B1f = 'b1rf.B1f + b1wf.B1f + b1wt.B1t;
+B1t = 'b1rt.B1t + b1wf.B1f + b1wt.B1t;
+
+B2f = 'b2rf.B2f + b2wf.B2f + b2wt.B2t;
+B2t = 'b2rt.B2t + b2wf.B2f + b2wt.B2t;
+
+K1 = 'kr1.K1 + kw1.K1 + kw2.K2;
+K2 = 'kr2.K2 + kw1.K1 + kw2.K2;
+
+P1 = 'b1wt.'kw2.P11;
+** P1 = 'b1wt.req1.'kw2.P11;
+P11 = b2rf.P12 + b2rt.(kr2.P11 + kr1.P12);  * to leave the cycle loop
+** P11 = b2rf.P12 + kr1.P12;                * no busy wait
+P12 = enter1.exit1.'b1wf.P1;                * just something to observe
+
+P2 = 'b2wt.'kw1.P21;                        * analogous to P1
+P21 = b1rf.P22 + b1rt.(kr1.P21 + kr2.P22);
+P22 = enter2.exit2.'b2wf.P2;
+
+set L = {b1rf, b2rf, b1rt, b2rt, b1wf, b2wf, b1wt, b2wt, kr1, kr2, kw1, kw2};
+Peterson = (P1 | P2 | B1f | B2f | K1) \ L;
+
+Spec = enter1.exit1.Spec + enter2.exit2.Spec;
