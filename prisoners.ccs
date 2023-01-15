@@ -1,0 +1,90 @@
+* 50 prisoners puzzle
+
+* 50 prisoners kept in separate cells got a chance to be released:
+* from time to time one of them will be carried in a special room and then back to cell
+* (in no particular order, possibly multiple times consecutively, but fairly to avoid infinite wait)
+
+* The room is completely empty except for a switch that can turn the light on or off (the light is not visible from outside).
+
+* At any time, if any of them claims rightfully that all the prisoners have already entered the room at least once, then all prisoners will be released (but if it proves wrong, then the chance ends and they will never be released).
+
+* The prisoners have the possibility to discuss in advance some protocol to follow (not all prisoners must behave in the same way).
+
+* Can you find a winning strategy for the prisoners?
+* Can you frmalise it in CSS (for 2 to 4 prisoners)
+
+* -Easy case: it is known that the light in the room is initially off
+* -Hard case: the initial state of the light in the room is not known
+
+* 2 prisoners, light initially off
+Room = enter . leave . Room;
+
+* suppose light initially off
+LightOn = off . LightOff ;
+LightOff = on . LightOn ;
+
+******************************************* 2 prisoners: normal and counter
+
+* the first time a prisoner finds the light off, he turns it on
+P1 = 'enter . ('on . 'leave . P0 + 'off . 'on . 'leave . P1) ;
+P0 = 'enter . 'leave . P0 ;
+
+* when the counter finds the light on, he frees all
+C1 = 'enter . ('off . 'free . 0 + 'on . 'off . 'leave . C1) ;
+
+* system with 2 prisoners
+** S2 = (LightOff | Room | C1 | P1) \ {enter, leave, on, off} ;
+
+* Explore: weak bisimulation collapse: 2 states: X = tau.X + ' free.0
+* terminal state has configuration P0
+* S2 |= Y;
+* X min= <'free>tt or <->X;
+* Y max = X and [tau]Y;
+
+**************************************** 3 prisoners, light initially off
+
+* when the counter finds the light on twice, he frees all
+C2 = 'enter . ('off . 'leave . C1 + 'on . 'off . 'leave . C2) ;
+
+* system with 3 prisoners
+** S3 = (LightOff | Room | C2 | P1 | P1) \ {enter, leave, on, off} ;
+
+* Explore: weak bisimulation collapse: 2 states
+* terminal state has configuration P0 | P0
+****************************************************************************
+
+* initial status of the light unknown
+Light = tau . LightOn + tau . LightOff ;
+
+* 2 prisoners
+** S2 = (Light | Room | C1 | P1) \ {enter, leave, on, off} ;
+* Explore: weak bisimulation collapse: 2 states
+* terminal state has both configuration P0 and P1!
+
+* 3 prisoners
+** S3 = (Light | Room | C2 | P1 | P1) \ {enter, leave, on, off} ;
+* Explore: weak bisimulation collapse: 2 states
+* terminal state has both configuration P0|P0 and P0|P1!
+
+* Any idea?
+****************************************************************************
+* idea: count twice
+P2 = 'enter . ('on . 'leave . P1 + 'off . 'on . 'leave . P2) ;
+
+* 2 prisoners
+S2 = (Light | Room | C2 | P2) \ {enter, leave, on, off} ;
+* Explore: weak bisimulation collapse: 2 states X = tau.X + 'free.0
+* terminal state has both configuration P0 and P1
+
+* 3 prisoners
+C4 = 'enter . ('off . 'leave . C3 + 'on . 'off . 'leave . C4) ;
+C3 = 'enter . ('off . 'leave . C2 + 'on . 'off . 'leave . C3) ;
+S3 = (Light | Room | C4 | P2 | P2) \ {enter, leave, on, off} ;
+* Explore: weak bisimulation collapse: 2 states X = tau.X + 'free.0
+* terminal state has both configuration P0|P0 and P0|P1
+
+****************************************************************************
+* 3 prisoners - faulty counter (free too soon)
+S3a = (Light | Room | C3 | P2 | P2) \ {enter, leave, on, off} ;
+* Explore: weak bisimulation collapse: 2 states X = tau.X + 'free.0
+* but terminal states admit also  configuration P0|P2
