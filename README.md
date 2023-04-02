@@ -2,5 +2,4 @@
 
 reference: https://caal.cs.aau.dk/
 
-in preparazione agli esami, magistrale Unipi
-- Principles for Software Composition
+in preparazione all'esame Principles for Software Composition (magistrale Unipi)
